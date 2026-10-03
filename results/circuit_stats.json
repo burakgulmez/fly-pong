@@ -1,0 +1,33 @@
+{
+ "neurons": 156,
+ "inputs": 116,
+ "intermediates": 14,
+ "outputs": 26,
+ "edges": 2190,
+ "frac_excitatory_edges": 1.0,
+ "spectral_radius_raw": 55.96052164323111,
+ "nt_edges": {
+  "ACH": 2190
+ },
+ "input_types": {
+  "PFNa": 55,
+  "PFNd": 40,
+  "PFNv": 21
+ },
+ "output_types": {
+  "PFL3_left": 12,
+  "PFL3_right": 12,
+  "DNa02_left": 1,
+  "DNa02_right": 1
+ },
+ "intermediate_types": {
+  "hDeltaA": 11,
+  "hDeltaG": 2,
+  "hDeltaH": 1
+ },
+ "edges_input_to_output": 0,
+ "edges_input_to_intermediate": 87,
+ "edges_intermediate_to_output": 70,
+ "edges_within_inputs": 1958,
+ "edges_output_to_input": 0
+}

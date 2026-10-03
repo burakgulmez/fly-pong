@@ -1,0 +1,6 @@
+variant,rho,T,per_neuron_out,k_in,n_params,val_points_for,val_points_against,val_hits,time_s
+base,0.9,4,False,8,61,0.59375,11.0,2.25,17.687015295028687
+rho0.5,0.5,4,False,8,61,1.0,11.0,3.5625,16.691588401794434
+T8,0.9,8,False,8,61,0.1875,11.0,1.03125,30.97505497932434
+per-neuron readout,0.9,4,True,8,85,8.875,9.875,21.125,19.51799774169922
+"per-neuron readout, k_in 16",0.9,4,True,16,141,10.3125,5.65625,26.71875,20.479446172714233

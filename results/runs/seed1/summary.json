@@ -1,0 +1,13 @@
+{
+ "seed": 1,
+ "n_params": 141,
+ "generations": 64,
+ "train_frames": 4141383,
+ "train_time_s": 55.99954319000244,
+ "test_points_for": 11.0,
+ "test_points_against": 0.55,
+ "test_hits": 25.63,
+ "test_match_win_rate": 1.0,
+ "test_match_loss_rate": 0.0,
+ "test_return_rate": 0.9789915966386554
+}

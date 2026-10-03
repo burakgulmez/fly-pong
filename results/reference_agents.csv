@@ -1,0 +1,4 @@
+agent,points_for,points_against,hits,match_win_rate,match_loss_rate,return_rate
+track_ball_rule,1.74,0.02,89.02,0.62,0.0,0.9997753818508536
+random_moves,1.54,11.0,4.74,0.0,1.0,0.301143583227446
+paddle_still,3.12,10.99,7.86,0.01,0.99,0.4169761273209549

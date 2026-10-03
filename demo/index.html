@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fly Steering Circuit Pong</title>
+<style>
+  :root {
+    --bg: #fcfcfb; --panel: #f4f3f0; --ink: #0b0b0b; --ink2: #52514e; --line: #dddcd6; --btn: #ffffff;
+    --court: #10233a; --court-line: #3b5676; --agent: #3987e5; --opp: #eb6834; --ball: #ffffff;
+    --pos: #2a78d6; --neg: #e34948; --accent: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141413; --panel: #1f1f1d; --ink: #f4f3ee; --ink2: #c3c2b7; --line: #383835; --btn: #2a2a28;
+      --court: #0c1624; --court-line: #2c3f57; --agent: #5598e7; --opp: #d95926; --ball: #f4f3ee;
+      --pos: #3987e5; --neg: #e66767; --accent: #3987e5;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141413; --panel: #1f1f1d; --ink: #f4f3ee; --ink2: #c3c2b7; --line: #383835; --btn: #2a2a28;
+    --court: #0c1624; --court-line: #2c3f57; --agent: #5598e7; --opp: #d95926; --ball: #f4f3ee;
+    --pos: #3987e5; --neg: #e66767; --accent: #3987e5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  .sub { color: var(--ink2); margin: 0 0 14px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  canvas { width: 100%; height: auto; display: block; border-radius: 6px; }
+  .stats { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0; font-variant-numeric: tabular-nums; }
+  .stats b { font-size: 1.1rem; } .stats span { color: var(--ink2); font-size: .8rem; display: block; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+  button, input { font: inherit; color: var(--ink); background: var(--btn); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; }
+  button { cursor: pointer; } button.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  input[type=number] { width: 8.5em; } label { color: var(--ink2); font-size: .85rem; }
+  .legend { color: var(--ink2); font-size: .8rem; }
+  .note { color: var(--ink2); font-size: .85rem; border-left: 3px solid var(--accent); padding-left: 10px; margin-top: 16px; }
+  .bar { height: 12px; background: var(--line); border-radius: 4px; position: relative; overflow: hidden; }
+  .bar > div { position: absolute; top: 0; bottom: 0; background: var(--accent); }
+  .bar::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--ink2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Fly Steering Circuit plays Pong</h1>
+  <p class="sub">The blue paddle (left) is controlled by a fixed network wired like the fruit fly's central-complex steering circuit (FlyWire connectome). The orange paddle is a simple built-in opponent.</p>
+  <div class="grid">
+    <div class="card">
+      <canvas id="game" width="560" height="400" aria-label="Pong"></canvas>
+      <div class="stats">
+        <div><span>Network</span><b id="s-a">0</b></div>
+        <div><span>Opponent</span><b id="s-o">0</b></div>
+        <div><span>Returns</span><b id="s-h">0</b></div>
+        <div><span>Frames</span><b id="s-f">0</b></div>
+        <div><span>Status</span><b id="s-status">ready</b></div>
+      </div>
+      <div class="row"><button id="b-start">Start</button><button id="b-step">Step</button><button id="b-new">New match</button>
+        <label>seed <input id="i-seed" type="number" value="1000000000"></label></div>
+      <div class="row"><label>Speed</label><button data-speed="1" class="on">Normal</button><button data-speed="4">Fast 4×</button><button data-speed="0">Turbo</button></div>
+      <div class="row"><label>Lesion</label><button data-les="mid">Silence hΔ intermediates</button><button data-les="pfl3L">Silence left PFL3</button><button data-les="pfl3R">Silence right PFL3</button></div>
+    </div>
+    <div class="card">
+      <b>Brain activity</b>
+      <canvas id="brain" width="500" height="330" aria-label="Neuron activity"></canvas>
+      <div class="legend">Left: PFN input neurons (PFNa, PFNd, PFNv; 116) · middle: hΔ intermediates (14) · right: PFL3 steering neurons and DNa02 (26), left and right hemisphere. Colour = activity (blue positive, red negative); a black ring marks a silenced neuron.</div>
+      <div style="margin-top:10px"><b>Paddle command</b> <span class="legend" id="z-val"></span></div>
+      <div class="bar"><div id="z-bar"></div></div>
+      <div class="legend" style="display:flex;justify-content:space-between"><span>← down</span><span>up →</span></div>
+    </div>
+  </div>
+  <p class="note"><b>What this is.</b> A hobby experiment. The connections come from a real brain wiring map (FlyWire FAFB v783): the central-complex neurons flies use to steer toward a goal direction. The weights are fixed; only 141 numbers were trained with an evolution strategy (about a minute on a laptop). They map six game readings (ball position and velocity, paddle height) onto the input neurons, and read the paddle speed from the output neurons. Every signal has to pass through the hΔ intermediate neurons: silence them and the paddle stops. It is not a fly's mind. In our tests 4 of 5 trained networks won all 100 test matches against this opponent; the fifth lost most of them.</p>
+  <p class="legend" id="err"></p>
+</div>
+<script src="sim.js"></script>
+<script src="weights.js"></script>
+<script>
+(function () {
+  "use strict";
+  const S = window.FlyPong, M = window.PONG_WEIGHTS, $ = (id) => document.getElementById(id);
+  if (!M) { $("err").textContent = "weights.js not found."; return; }
+  let COL = {};
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ["--court", "--court-line", "--agent", "--opp", "--ball", "--ink2", "--ink", "--panel", "--pos", "--neg"])
+      COL[k] = cs.getPropertyValue(k).trim();
+  }
+  readColors();
+  const net = new S.Net(M), u = new Float64Array(6);
+  const les = { mid: false, pfl3L: false, pfl3R: false };
+  let game, prev = null, alpha = 1, running = false, speed = 1, timer = null;
+
+  function snap() { return { bx: game.bx, by: game.by, py: game.py, oy: game.oy }; }
+  function newGame() {
+    game = new S.Game(Math.max(0, parseInt($("i-seed").value, 10) || 0));
+    net.reset(); applyMask(); prev = snap(); alpha = 1; draw();
+  }
+  function applyMask() {
+    net.mask.fill(1);
+    for (let i = 0; i < M.n; i++) {
+      if (les.mid && M.role[i] === 1) net.mask[i] = 0;
+      if (les.pfl3L && M.types[i] === "PFL3" && M.side[i] === "left") net.mask[i] = 0;
+      if (les.pfl3R && M.types[i] === "PFL3" && M.side[i] === "right") net.mask[i] = 0;
+    }
+  }
+  function tick() {
+    if (game.done) { stop(); return false; }
+    prev = snap();
+    game.features(u); game.step(net.step(u));
+    return true;
+  }
+
+  const cv = $("game"), cx = cv.getContext("2d");
+  function drawGame() {
+    const W = cv.width, H = cv.height, P = S.P;
+    const X = (x) => x * W, Y = (y) => (1 - y) * H;
+    const t = game.done ? 1 : alpha;
+    const lerp = (a, b) => a + (b - a) * t;
+    // no interpolation across a serve (ball jumps back to the centre)
+    const jumped = Math.abs(game.bx - prev.bx) > 0.2;
+    const bx = jumped ? game.bx : lerp(prev.bx, game.bx), by = jumped ? game.by : lerp(prev.by, game.by);
+    const py = lerp(prev.py, game.py), oy = lerp(prev.oy, game.oy);
+    cx.fillStyle = COL["--court"]; cx.fillRect(0, 0, W, H);
+    cx.strokeStyle = COL["--court-line"]; cx.lineWidth = 3; cx.setLineDash([10, 10]);
+    cx.beginPath(); cx.moveTo(W / 2, 0); cx.lineTo(W / 2, H); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = COL["--court-line"]; cx.font = "bold 44px system-ui"; cx.textAlign = "center";
+    cx.fillText(String(game.sa), W * 0.3, 56); cx.fillText(String(game.so), W * 0.7, 56);
+    const pw = 10, ph = P.PAD_H * 2 * H;
+    cx.fillStyle = COL["--agent"]; cx.fillRect(Math.round(X(P.AGENT_X)) - pw, Math.round(Y(py) - ph / 2), pw, Math.round(ph));
+    cx.fillStyle = COL["--opp"]; cx.fillRect(Math.round(X(P.OPP_X)), Math.round(Y(oy) - ph / 2), pw, Math.round(ph));
+    cx.fillStyle = COL["--ball"]; cx.beginPath(); cx.arc(X(bx), Y(by), P.BALL_R * H, 0, 7); cx.fill();
+    $("s-a").textContent = game.sa; $("s-o").textContent = game.so; $("s-h").textContent = game.hits; $("s-f").textContent = game.frame;
+    $("s-status").textContent = game.done ? (game.sa > game.so ? "network won" : game.sa < game.so ? "opponent won" : "time up") : (running ? "playing" : "paused");
+  }
+
+  const bc = $("brain"), bctx = bc.getContext("2d");
+  let pos = null;
+  function layout() {
+    const cols = [[], [], []];
+    for (let i = 0; i < M.n; i++) cols[M.role[i]].push(i);
+    const W = bc.width, H = bc.height;
+    pos = new Array(M.n); pos.labels = [];
+    // inputs and intermediates: simple grids
+    [[0, W * 0.2, W * 0.3], [1, W * 0.5, W * 0.1]].forEach(([c, x0, width]) => {
+      const list = cols[c];
+      const per = c === 1 ? 2 : Math.ceil(Math.sqrt(list.length * width / (H - 30)));
+      const rows = Math.ceil(list.length / per), dx = width / per, dy = Math.min((H - 30) / rows, 24);
+      list.forEach((i, k) => { pos[i] = [x0 + ((k % per) - (per - 1) / 2) * dx, 15 + (Math.floor(k / per) + .5) * dy, Math.min(dx, dy)]; });
+    });
+    // outputs: left-hemisphere cells in one column, right-hemisphere cells in the next; DNa02 on top
+    const xL = W * 0.72, xR = W * 0.80, dy = 20, y0 = 34;
+    const row = { left: 0, right: 0 };
+    const ordered = cols[2].slice().sort((a, b) => (M.types[a] === "DNa02" ? 0 : 1) - (M.types[b] === "DNa02" ? 0 : 1) || a - b);
+    for (const i of ordered) {
+      const side = M.side[i] === "right" ? "right" : "left";
+      const gap = M.types[i] === "DNa02" ? 0 : 8;                 // small gap under the DNa02 row
+      pos[i] = [side === "left" ? xL : xR, y0 + row[side] * dy + gap, 17];
+      row[side]++;
+    }
+    pos.labels = [["left", xL, 16, "center"], ["right", xR, 16, "center"],
+                  ["DNa02", W * 0.86, y0 + 4, "left"], ["PFL3", W * 0.86, y0 + dy + 12, "left"]];
+  }
+  function drawBrain() {
+    if (!pos) layout();
+    const W = bc.width, H = bc.height;
+    bctx.fillStyle = COL["--panel"]; bctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < M.n; i++) {
+      const [x, y, s] = pos[i], v = net.phi[i];
+      bctx.globalAlpha = 0.15 + 0.85 * Math.min(1, Math.abs(v));
+      bctx.fillStyle = v >= 0 ? COL["--pos"] : COL["--neg"];
+      bctx.beginPath(); bctx.arc(x, y, Math.max(1.5, s * 0.42), 0, 7); bctx.fill();
+      bctx.globalAlpha = 1;
+      if (net.mask[i] === 0) { bctx.strokeStyle = COL["--ink"]; bctx.lineWidth = 1; bctx.stroke(); }
+    }
+    bctx.fillStyle = COL["--ink2"]; bctx.font = "11px system-ui";
+    for (const [text, x, y, align] of pos.labels) { bctx.textAlign = align; bctx.fillText(text, x, y); }
+    const m = Math.tanh(net.z), w = Math.abs(m) * 50;
+    const bar = $("z-bar"); bar.style.width = w + "%"; bar.style.left = (m >= 0 ? 50 : 50 - w) + "%";
+    $("z-val").textContent = `${m >= 0 ? "up" : "down"} ${Math.abs(m).toFixed(2)}`;
+  }
+  function draw() { drawGame(); drawBrain(); }
+
+  let last = 0, acc = 0, lastBrain = 0;
+  function loop(now) {
+    if (!running) return;
+    if (!last) last = now;
+    const dt = Math.min(50, now - last); last = now;
+    if (speed === 0) {
+      const t0 = performance.now();
+      while (performance.now() - t0 < 12 && tick());
+      alpha = 1;
+    } else {
+      acc += dt * 60 * speed / 1000;
+      let n = 0;
+      while (acc >= 1 && n < 60) { if (!tick()) { acc = 0; break; } acc -= 1; n++; }
+      alpha = speed === 1 ? acc : 1;
+    }
+    drawGame();
+    if (now - lastBrain > 50) { drawBrain(); lastBrain = now; }
+    if (running) timer = requestAnimationFrame(loop);
+  }
+  function start() { if (game.done) newGame(); running = true; last = 0; acc = 0; $("b-start").textContent = "Pause"; timer = requestAnimationFrame(loop); }
+  function stop() { running = false; cancelAnimationFrame(timer); $("b-start").textContent = "Start"; alpha = 1; draw(); }
+  $("b-start").onclick = () => (running ? stop() : start());
+  $("b-step").onclick = () => { stop(); tick(); alpha = 1; draw(); };
+  $("b-new").onclick = () => { stop(); newGame(); };
+  document.querySelectorAll("[data-les]").forEach((b) => b.onclick = () => {
+    les[b.dataset.les] = !les[b.dataset.les]; b.classList.toggle("on", les[b.dataset.les]); applyMask(); draw();
+  });
+  document.querySelectorAll("[data-speed]").forEach((b) => b.onclick = () => {
+    speed = +b.dataset.speed; document.querySelectorAll("[data-speed]").forEach((x) => x.classList.toggle("on", x === b));
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); draw(); });
+  newGame();
+})();
+</script>
+</body>
+</html>

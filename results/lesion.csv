@@ -1,0 +1,31 @@
+seed,condition,n_silenced,points_for,points_against,hits,match_win_rate
+0,intact,0,11.0,0.95,24.38,1.0
+0,all intermediates (hDelta),14,0.2,11.0,0.72,0.0
+0,all PFN inputs,116,0.2,11.0,0.72,0.0
+0,PFL3 left,12,10.71,6.95,28.0,0.87
+0,PFL3 right,12,2.0,11.0,7.93,0.0
+0,DNa02 (both),2,11.0,1.77,23.95,1.0
+1,intact,0,11.0,0.55,25.63,1.0
+1,all intermediates (hDelta),14,1.72,11.0,5.13,0.0
+1,all PFN inputs,116,1.72,11.0,5.13,0.0
+1,PFL3 left,12,10.66,6.73,27.35,0.89
+1,PFL3 right,12,8.25,10.51,19.37,0.23
+1,DNa02 (both),2,11.0,1.59,25.0,1.0
+2,intact,0,10.84,0.19,51.71,1.0
+2,all intermediates (hDelta),14,1.39,11.0,4.51,0.0
+2,all PFN inputs,116,1.39,11.0,4.51,0.0
+2,PFL3 left,12,9.72,7.47,44.39,0.68
+2,PFL3 right,12,10.49,7.03,23.02,0.78
+2,DNa02 (both),2,9.09,1.12,59.16,1.0
+3,intact,0,5.55,10.89,13.55,0.04
+3,all intermediates (hDelta),14,0.2,11.0,0.78,0.0
+3,all PFN inputs,116,0.2,11.0,0.78,0.0
+3,PFL3 left,12,0.33,11.0,1.0,0.0
+3,PFL3 right,12,5.55,10.82,13.71,0.07
+3,DNa02 (both),2,5.31,10.95,13.81,0.03
+4,intact,0,10.99,0.15,41.76,1.0
+4,all intermediates (hDelta),14,0.0,11.0,0.13,0.0
+4,all PFN inputs,116,0.0,11.0,0.13,0.0
+4,PFL3 left,12,0.05,11.0,0.4,0.0
+4,PFL3 right,12,11.0,0.91,36.44,1.0
+4,DNa02 (both),2,10.68,0.95,49.85,1.0
